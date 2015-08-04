@@ -43,9 +43,27 @@ class handler:
         url = "http://%s/core/api/jeeApi.php?request=%s"% ( self.ip, data )
         req = urllib2.Request(url, data, self.headers)
         response = urllib2.urlopen(req)
-        return response.read()
+        fulljson = response.read()
+        myjson = json.loads(fulljson)
+        return  myjson["result"]
 
     def method(self, method):
         self.parameters["method"] = method
         return self.send()
+
+    def getstate(self, logicalid):
+        """
+        Exemple:
+        from APIHandler import handler
+
+        api = handler.handler("192.168.0.XXX", "i9fjkfvjkdhvdfjkXXXX")
+        print api.getstate("sunrise")
+        print api.getstate("firmwareOnline")
+        """
+        myjson = self.method("object::full")
+        for room in myjson:
+            for equipement in room["eqLogics"]:
+                for cmd in equipement["cmds"]:
+                    if cmd["logicalId"] == logicalid:
+                        return cmd["state"]
 
